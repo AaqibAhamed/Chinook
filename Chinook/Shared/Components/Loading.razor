@@ -1,0 +1,12 @@
+﻿<div class="d-flex align-items-center">
+    <div class="spinner-border spinner-border-sm"></div>
+    @if (Message == null)
+    {
+        Message = "Loading...";
+    }
+    <span class="m-2">@Message</span>
+</div>
+
+@code {
+    [Parameter] public string Message { get; set; }
+}

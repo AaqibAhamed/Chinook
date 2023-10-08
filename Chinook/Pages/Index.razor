@@ -1,0 +1,58 @@
+﻿@page "/"
+@attribute [Authorize]
+
+@using Chinook.Models
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Index</PageTitle>
+
+<h1>Artists</h1>
+
+@if (Artists == null)
+{
+    <Loading />
+}
+else
+{
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Number of albums</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var artist in Artists)
+            {
+                <tr>
+                    <td><a href="Artist/@artist.ArtistId">@artist.Name</a></td>
+                    <td>@artist.Albums.Count()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Artist> Artists;
+    [Inject] IDbContextFactory<ChinookContext> DbFactory { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        await InvokeAsync(StateHasChanged);
+        Artists = await GetArtists();
+    }
+
+    public async Task<List<Artist>> GetArtists()
+    {   
+        var dbContext = await DbFactory.CreateDbContextAsync();
+        var users = dbContext.Users.Include(a => a.UserPlaylists).ToList();
+        
+        return dbContext.Artists.ToList();
+    }
+
+    public async Task<List<Album>> GetAlbumsForArtist(int artistId)
+    {
+        var dbContext = await DbFactory.CreateDbContextAsync();
+        return dbContext.Albums.Where(a => a.ArtistId == artistId).ToList();
+    }
+}
